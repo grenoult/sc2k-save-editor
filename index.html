@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+<body>
+
+    <input type="file" id="file-upload">
+    <pre id="file-content"></pre>
+
+    <input type="hidden" id="file-content-hex">
+    <input type="hidden" id="file-name">
+
+    <form style="display: none;" id="editor-form">
+        <label for="money-value">Money:</label>
+        <input type="number" id="money-value" min=" -2147483648" max="2147483647"/>
+
+        <input type="submit" value="Save"/>
+    </form>
+
+</body>
+<script>
+    (function () {
+        const fileUpload = document.getElementById("file-upload");
+        const fileContent = document.getElementById("file-content");
+        const editorForm = document.getElementById("editor-form");
+        let file_hex_content;
+
+        fileUpload.addEventListener("change", function () {
+            const file = fileUpload.files[0];
+            document.getElementById("file-name").value = file.name;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                var u = new Uint8Array(this.result),
+                    file_hex_content = new Array(u.length),
+                    i = u.length;
+                while (i--) // map to hex
+                    file_hex_content[i] = (u[i] < 16 ? '0' : '') + u[i].toString(16);
+                u = null; // free memory
+                
+                // Store file content (hex) in hidden input
+                document.getElementById("file-content-hex").value = file_hex_content.join('');
+
+                handleMoney();
+            }
+            reader.readAsArrayBuffer(file);
+        });
+
+        editorForm.addEventListener("submit", e => {
+            e.preventDefault();
+
+            // Edit money
+            const newMoneyHex = parseInt(document.getElementById("money-value").value).toString(16);
+
+            // Build file
+            let file_hex_content = document.getElementById("file-content-hex").value;
+            
+            // Convert to array, so that we can modify it
+            file_hex_content = file_hex_content.split('');
+
+            // Replace money value
+            file_hex_content.splice(158, 8, newMoneyHex);
+
+            // Rebuild to string
+            file_hex_content = file_hex_content.join('');
+
+            // Build ArrayBuffer
+            var typedArray = new Uint8Array(file_hex_content.match(/[\da-f]{2}/gi).map(function (h) {
+                return parseInt(h, 16)
+            }))
+            
+            const blob = new Blob([typedArray], { type: "application/octet-stream" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", document.getElementById("file-name").value);
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+
+        const handleMoney = () => {
+            const file_hex_content = document.getElementById("file-content-hex").value;
+            const initialMoneyValueHex = (file_hex_content.slice(158,166)).toString('hex');
+            const initialMoneyValue = parseInt(initialMoneyValueHex, 16);
+            
+            document.getElementById("money-value").value = initialMoneyValue;
+
+            document.getElementById("editor-form").style.display="block"; // TODO move out of this function
+        }
+    })();
+</script>
+
+</html>
