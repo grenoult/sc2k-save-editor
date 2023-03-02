@@ -1,21 +1,33 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>Sim City 2000 save file editor</title>
     </head>
 <body>
-
+    <!-- Instructions -->
+    <h1>Sim City 2000 Save File Editor</h1>
+    <p>Online save file editor for Sim City 2000!</p>
+    <p>Upload your <code>.sc2</code> file, edit it, and save it. A new <code>.sc2</code> file will be downloaded.</p>
+    <p>&nbsp;</p>
+    
+    <!-- Form -->
     <input type="file" id="file-upload">
     <pre id="file-content"></pre>
-
+    
     <input type="hidden" id="file-content-hex">
     <input type="hidden" id="file-name">
-
+    
     <form style="display: none;" id="editor-form">
         <label for="money-value">Money:</label>
-        <input type="number" id="money-value" min=" -2147483648" max="2147483647"/>
-
+        <input type="number" id="money-value" min="-2147483648" max="2147483647"/>
+        
         <input type="submit" value="Save"/>
     </form>
+    
+    <!-- Footer -->
+    <p>&nbsp;</p>
+    <hr/>
+    <p>2023 - <a href="https://github.com/grenoult/sc2k-save-editor">GitHub</a></p>
 
 </body>
 <script>
